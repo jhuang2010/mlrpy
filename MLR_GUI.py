@@ -15,6 +15,8 @@ import pandas as pd
 import random
 import time
 import joblib
+import ctypes
+
 
 class ML(object):
     def __init__(self):
@@ -226,288 +228,295 @@ class ML(object):
             result_dic.update({reg:[sigma_y,sigma_perc_y,y_vector,regsize]})
         # print(result_dic)
         return result_dic
-    
-# function to get absolute path to data file
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
 
-# creating tkinter window
-window = tk.Tk()
-window.title('ML Regressor')
-window.geometry('640x720')
 
-# design parameters
-w_cb = 8
-w_cl = 25
-w_lb = 8
-w_bt = 10
-w_xb = 2
-n_padx = 10
-n_pady_cl = 5
-n_pady = 2
-lb_just = tk.W
+class GUI:
+    def __init__(self):
+        # creating tkinter window
+        self.window = tk.Tk()
+        self.window.title('ML Regressor')
+        self.window.geometry('640x720')
 
-# label groups
-lf1 = ttk.Labelframe(window,text='Data Configuration')
-lf1.grid(column = 0, row = 1, padx = n_padx, pady=n_pady_cl)
-lf2 = ttk.LabelFrame(window,text='Model Configuration')
-lf2.grid(column = 2, row = 1, rowspan = 2, padx = n_padx, pady=n_pady_cl)
-lf3 = ttk.LabelFrame(window,text='Results Configuration')
-lf3.grid(column = 0, row = 2, padx = n_padx, pady=n_pady_cl)
+        # design parameters
+        self.w_bt = 10
+        self.w_xb = 2
+        self.w_cb = 10
+        self.n_padx = 5
+        self.n_pady = 2
+        self.sticky_just = tk.W
 
-# labels
-lb1 = ('Data Configuration')
-lb2 = ('Points:')
-lb3 = ('Split:')
-lb4 = ('Results Display')
-lb5 = ('Model Configuration')
-lb6 = ('Inputs:')
-lb7 = ('Output:')
-lb8 = ('Models:')
-ttk.Label(lf1, text = lb2, width = w_lb).grid(column = 0,row = 3, padx = n_padx, pady = n_pady, sticky = lb_just)
-ttk.Label(lf1, text = lb3, width = w_lb).grid(column = 0,row = 4, padx = n_padx, pady = n_pady, sticky = lb_just)
-ttk.Label(lf3, text = lb2, width = w_lb).grid(column = 0,row = 7, padx = n_padx, pady = n_pady, sticky = lb_just)
-ttk.Label(lf2, text = lb6, width = w_lb).grid(column = 2,row = 3, padx = n_padx, pady = n_pady, sticky = lb_just)
-ttk.Label(lf2, text = lb7, width = w_lb).grid(column = 2,row = 8, padx = n_padx, pady = n_pady, sticky = lb_just)
-ttk.Label(lf2, text = lb8, width = w_lb).grid(column = 4,row = 3, padx = n_padx, pady = n_pady, sticky = lb_just)
-lb14 = StringVar()
-lb14.set('Status: Not Loaded...')
-ttk.Label(window, textvariable = lb14).grid(column = 0,row = 15, columnspan=2, padx = n_padx, pady = n_pady, sticky = lb_just)
-lb15 = StringVar()
-lb15.set('Data points: Not ready...')
-ttk.Label(window, textvariable = lb15).grid(column = 2,row = 15, padx = n_padx, pady = n_pady, sticky = tk.E)
+        # initialise lists and objects
+        self.lb7to8 = []
+        self.cb1to9 = []
+        self.var1to5 = []
+        self.ax = None
+        self.fig = None
+        self.toolbar = None
+        self.ml = ML()
 
-# comboboxes
-list1 = [100,400,1000]
-list2 = [0.1,0.2,0.3,0.4,0.5]
-list3 = [5,10,25]
-list4 = []
-list5 = []
-list6 = []
-list7 = []
-list8 = []
-list9 = []
-cb1 = ttk.Combobox(lf1, width = w_cb, textvariable = tk.StringVar())
-cb1['values'] = (list1)
-cb1.grid(column = 1, row = 3, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb2 = ttk.Combobox(lf1, width = w_cb, textvariable = tk.StringVar())
-cb2['values'] = (list2)
-cb2.grid(column = 1, row = 4, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb3 = ttk.Combobox(lf3, width = w_cb, textvariable = tk.StringVar())
-cb3['values'] = (list3)
-cb3.grid(column = 1, row = 7, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb4 = ttk.Combobox(lf2, width = w_cb, textvariable = tk.StringVar())
-cb4['values'] = (list4)
-cb4.grid(column = 3, row = 3, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb5 = ttk.Combobox(lf2, width = w_cb, textvariable = tk.StringVar())
-cb5['values'] = (list5)
-cb5.grid(column = 3, row = 4, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb6 = ttk.Combobox(lf2, width = w_cb, textvariable = tk.StringVar())
-cb6['values'] = (list6)
-cb6.grid(column = 3, row = 5, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb7 = ttk.Combobox(lf2, width = w_cb, textvariable = tk.StringVar())
-cb7['values'] = (list7)
-cb7.grid(column = 3, row = 6, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb8 = ttk.Combobox(lf2, width = w_cb, textvariable = tk.StringVar())
-cb8['values'] = (list8)
-cb8.grid(column = 3, row = 7, padx = n_padx, pady = n_pady, sticky = lb_just)
-cb9 = ttk.Combobox(lf2, width = w_cb, textvariable = tk.StringVar())
-cb9['values'] = (list9)
-cb9.grid(column = 3, row = 8, padx = n_padx, pady = n_pady, sticky = lb_just)
-# cb1['state']='readonly'
-# cb2['state']='readonly'
-# cb3['state']='readonly'
-cb4['state']='readonly'
-cb5['state']='readonly'
-cb6['state']='readonly'
-cb7['state']='readonly'
-cb8['state']='readonly'
-cb9['state']='readonly'
+        # reset app scaling due to dpi change on windows
+        if sys.platform == 'win32':
+            ctypes.windll.shcore.SetProcessDpiAwareness(0)
 
-# check boxes
-var1 = IntVar()
-xb1 = Checkbutton(lf2, text="MLR", variable=var1).grid(column=5, row=3, padx = n_padx, pady = n_pady, sticky = lb_just)
-var2 = IntVar()
-xb2 = Checkbutton(lf2, text="PLR", variable=var2).grid(column=5, row=4, padx = n_padx, pady = n_pady, sticky = lb_just)
-var3 = IntVar()
-xb3 = Checkbutton(lf2, text="SVR", variable=var3).grid(column=5, row=5, padx = n_padx, pady = n_pady, sticky = lb_just)
-var4 = IntVar()
-xb4 = Checkbutton(lf2, text="DTR", variable=var4).grid(column=5, row=6, padx = n_padx, pady = n_pady, sticky = lb_just)
-var5 = IntVar()
-xb5 = Checkbutton(lf2, text="RFR", variable=var5).grid(column=5, row=7, padx = n_padx, pady = n_pady, sticky = lb_just)
+    # function to get absolute path to data file
+    def resource_path(self, relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, relative_path)
 
-# canvas for data plots
-matplotlib.use('TkAgg')
-fig, ax = plt.subplots(1,1) 
-canvas = FigureCanvasTkAgg(fig, master=window)
-plot_widget = canvas.get_tk_widget()
-plot_widget.grid(row=9, column=0, rowspan = 6,columnspan = 5)
-toolbar_frame = Frame(window)
-toolbar_frame.grid(row=15, column=0, columnspan = 5)
-toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+    def create_group(self, txt, column, row, rowspan):
+        lf = ttk.Labelframe(self.window, text=txt)
+        lf.grid(column=column, row=row, rowspan=rowspan, padx=self.n_padx, pady=self.n_pady)
+        return lf
 
-ml = ML()
+    def create_label(self, parent, txt, column, row, columnspan):
+        lb = tk.StringVar()
+        lb.set(txt)
+        ttk.Label(parent, textvariable=lb).grid(column=column, row=row, columnspan=columnspan, padx=self.n_padx,
+                                           pady=self.n_pady, sticky=self.sticky_just)
+        return lb
 
-# function to terminate app
-def app_quit():
-    response=messagebox.askyesno('Exit','Do you want to close app?')
-    if response:
-        # is_stop.set()
-        # sleep(2)
-        window.quit()
-        window.destroy()
+    def create_combobox(self, parent, lst, column, row, columnspan):
+        cb = ttk.Combobox(parent, width=self.w_cb, textvariable=tk.StringVar())
+        cb['values'] = lst
+        cb.grid(column=column, row=row, columnspan=columnspan)
+        cb['state'] = 'readonly'
+        return cb
 
-# load data to app
-def load():
-    filetypes = (('csv files','*.csv'),('txt files','*.txt'),('all files','*.*'))
-    f = fd.askopenfile(title="Open Data File",filetypes = filetypes,initialdir = ml.dirDefault)
-    if not f is None:
-        try: 
-            datafilepath = f.name
-            print('Data File Loaded: '+datafilepath)
-            ml.dirDefault = os.path.dirname(datafilepath)
-            ml.dirFile = datafilepath
-            dataset = pd.read_csv(ml.dirFile,header = 0)
-            print('Number of data points: '+str(dataset.shape[0]))
-            # print(dataset.columns.values)
-            lb15.set('Data points: '+str(dataset.shape[0])+' loaded')
-            ml.numdata = dataset.shape[0]
-            ml.numsample = ml.numdata
-            header = list(dataset.columns.values)
-            cb4['values'] = ['']+header
-            cb5['values'] = ['']+header
-            cb6['values'] = ['']+header
-            cb7['values'] = ['']+header
-            cb8['values'] = ['']+header
-            cb9['values'] = ['']+header
-            ml.loaded = True
-            lb14.set('Status: Data Loaded!')
-        except Exception:
-            messagebox.showerror('Error','Check Data File!')
-            return   
+    def create_checkbox(self, parent, txt, column, row):
+        var = IntVar()
+        Checkbutton(parent, text=txt, variable=var).grid(column=column, row=row, padx=self.n_padx, pady=self.n_pady,
+                                                         sticky=self.sticky_just)
+        return var
 
-# train models based on app inputs
-def train():
-    if not ml.loaded:
-        messagebox.showerror('Error','Data Not Loaded!')
-        return       
-    if cb1.get() != '':
-        try: 
-            if int(cb1.get()) > ml.numdata:
-                messagebox.showerror('Error','Points must be not exceed '+str(ml.numdata)+'!')
+    def load_gui(self):
+        # Groups
+        txt1to3 = ('Data Configuration','Model Configuration','Results Configuration')
+        val1to3 = ((0,1,1),(2,1,2),(0,2,1))
+        lf1to3 = []
+        for text, (column, row, rowspan) in zip(txt1to3, val1to3):
+            lf1to3.append(self.create_group(text, column, row, rowspan))
+
+        # Labels
+        txt1to6 = ('Points:','Split:','Points:','Inputs:','Output:','Models:')
+        val1to6 = ((1,0,3,1),(1,0,4,1),(3,0,7,1),(2,2,3,1),(2,2,8,1),(2,4,3,1))
+        lb1to6 = []
+        for text, (n_lf, column, row, columnspan) in zip(txt1to6, val1to6):
+            lb1to6.append(self.create_label(lf1to3[n_lf-1], text, column, row, columnspan))
+        txt7to8 = ('Status: Not Loaded...','Data: Not Ready...')
+        val7to8 = ((0,15,2),(2,15,2))
+        self.lb7to8 = []
+        for text, (column, row, columnspan) in zip(txt7to8, val7to8):
+            self.lb7to8.append(self.create_label(self.window, text, column, row, columnspan))
+
+        # ComboBoxes
+        list1 = [100, 400, 1000]
+        list2 = [0.1, 0.2, 0.3, 0.4, 0.5]
+        list3 = [5, 10, 25]
+        list4 = []
+        list5 = []
+        list6 = []
+        list7 = []
+        list8 = []
+        list9 = []
+        lst1to9 = (list1, list2, list3, list4, list5, list6, list7, list8, list9)
+        val1to9 = ((1,1,3),(1,1,4),(3,1,7),(2,3,3),(2,3,4),(2,3,5),(2,3,6),(2,3,7),(2,3,8))
+        self.cb1to9 = []
+        for lst, (n_lf, column, row) in zip(lst1to9, val1to9):
+            self.cb1to9.append(self.create_combobox(lf1to3[n_lf-1], lst,  column, row, 1))
+        self.cb1to9[0]['state'] = 'normal'
+        self.cb1to9[1]['state'] = 'normal'
+        self.cb1to9[2]['state'] = 'normal'
+
+        # CheckBoxes
+        txt1to5 = ("MLR", "PLR", "SVR", "DTR", "RFR")
+        val1to5 = ((5,3),(5,4),(5,5),(5,6),(5,7))
+        self.var1to5 = []
+        for text, (column, row) in zip(txt1to5, val1to5):
+            self.var1to5.append(self.create_checkbox(lf1to3[1], text, column, row))
+
+        # Canvas for data plots
+        matplotlib.use('TkAgg')
+        self.fig, self.ax = plt.subplots(1, 1)
+        canvas = FigureCanvasTkAgg(self.fig, master=self.window)
+        plot_widget = canvas.get_tk_widget()
+        plot_widget.grid(row=9, column=0, rowspan=6, columnspan=6)
+        toolbar_frame = Frame(self.window)
+        toolbar_frame.grid(row=15, column=0, columnspan=6)
+        self.toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+
+        # Buttons
+        bt1 = ttk.Button(lf1to3[0], text="Load", command=self.load_data, width=self.w_bt).grid(column=1, row=5,
+                                                                                               padx=self.n_padx,
+                                                                                               pady=self.n_pady,
+                                                                                               sticky=self.sticky_just)
+        bt2 = ttk.Button(lf1to3[1], text="Train", command=self.train, width=self.w_bt).grid(column=5, row=8,
+                                                                                            padx=self.n_padx,
+                                                                                            pady=self.n_pady,
+                                                                                            sticky=self.sticky_just)
+        bt3 = ttk.Button(lf1to3[2], text="Predict", command=self.predict, width=self.w_bt).grid(column=1, row=8,
+                                                                                                padx=self.n_padx,
+                                                                                                pady=self.n_pady,
+                                                                                                sticky=self.sticky_just)
+
+        # Loop window
+        self.window.protocol('WM_DELETE_WINDOW', self.app_quit)
+        self.window.mainloop()
+
+    def load_data(self):
+        filetypes = (('csv files', '*.csv'), ('txt files', '*.txt'), ('all files', '*.*'))
+        f = fd.askopenfile(title="Open Data File", filetypes=filetypes, initialdir=self.ml.dirDefault)
+        if not f is None:
+            try:
+                datafilepath = f.name
+                print('Data File Loaded: ' + datafilepath)
+                self.ml.dirDefault = os.path.dirname(datafilepath)
+                self.ml.dirFile = datafilepath
+                dataset = pd.read_csv(self.ml.dirFile, header=0)
+                print('Number of data points: ' + str(dataset.shape[0]))
+                # print(dataset.columns.values)
+                self.lb7to8[1].set('Data points: ' + str(dataset.shape[0]) + ' loaded')
+                self.ml.numdata = dataset.shape[0]
+                self.ml.numsample = self.ml.numdata
+                header = list(dataset.columns.values)
+                for i in range(len(header)+1):
+                    self.cb1to9[i+3]['values'] = [''] + header
+                self.ml.loaded = True
+                self.lb7to8[0].set('Status: Data Loaded!')
+            except Exception:
+                messagebox.showerror('Error', 'Check Data File!')
                 return
-            else:
-                ml.numsample = int(cb1.get())
-        except Exception:
-            messagebox.showerror('Error','Input Error!')
+
+    def get_ml(self):
+        xblst = [(self.var1to5[0].get(), 'MLR'), (self.var1to5[1].get(), 'PLR'), (self.var1to5[2].get(), 'SVR'),
+                 (self.var1to5[3].get(),
+                                                                                                      'DTR'),
+                 (self.var1to5[4].get(), 'RFR')]
+        reglst = []
+        for val, txt in xblst:
+            if val == 1:
+                reglst.append(txt)
+        # print(reglst)
+        return reglst
+
+    # train models based on app inputs
+    def train(self):
+        if not self.ml.loaded:
+            messagebox.showerror('Error', 'Data Not Loaded!')
             return
-    else:
-        messagebox.showerror('Error','Enter Points!')
-        return
-    if cb2.get() != '':
-        try: 
-            if not 0.0 < float(cb2.get()) < 1.0:
-                messagebox.showerror('Error','Split must be between 0 and 1!')
+        if self.cb1to9[0].get() != '':
+            try:
+                if int(self.cb1to9[0].get()) > self.ml.numdata:
+                    messagebox.showerror('Error', 'Points must be not exceed ' + str(self.ml.numdata) + '!')
+                    return
+                else:
+                    self.ml.numsample = int(self.cb1to9[0].get())
+            except Exception:
+                messagebox.showerror('Error', 'Input Error!')
                 return
-            else:
-                ml.split = float(cb2.get())
+        else:
+            messagebox.showerror('Error', 'Enter Points!')
+            return
+        if self.cb1to9[1].get() != '':
+            try:
+                if not 0.0 < float(self.cb1to9[1].get()) < 1.0:
+                    messagebox.showerror('Error', 'Split must be between 0 and 1!')
+                    return
+                else:
+                    self.ml.split = float(self.cb1to9[1].get())
+            except Exception:
+                messagebox.showerror('Error', 'Input Error!')
+                return
+        else:
+            messagebox.showerror('Error', 'Enter Split!')
+            return
+        cblst = [self.cb1to9[3].get(), self.cb1to9[4].get(), self.cb1to9[5].get(), self.cb1to9[6].get(),
+                 self.cb1to9[7].get()]
+        inputlst = []
+        for cb in cblst:
+            if cb:
+                inputlst.append(cb)
+        outputlst = []
+        if self.cb1to9[8].get():
+            outputlst.append(self.cb1to9[8].get())
+        self.ml.inputs = inputlst
+        self.ml.output = outputlst
+        if self.ml.inputs == []:
+            messagebox.showerror('Error', 'Choose Inputs!')
+            return
+        if self.ml.output == []:
+            messagebox.showerror('Error', 'Choose Output!')
+            return
+        reglst = self.get_ml()
+        self.ml.reglst = reglst
+        if self.ml.reglst == []:
+            messagebox.showerror('Error', 'Choose Model!')
+            return
+        try:
+            t1 = time.time()
+            self.ml.train()
+            t2 = time.time()
+            self.lb7to8[0].set('Status: Trained ~' + str(round((t2 - t1) * 1e3, 1)) + 'ms')
         except Exception:
-            messagebox.showerror('Error','Input Error!')
-            return            
-    else:
-        messagebox.showerror('Error','Enter Split!')
-        return
-    cblst = [cb4.get(),cb5.get(),cb6.get(),cb7.get(),cb8.get()]
-    inlst = []
-    for cb in cblst:
-        if cb:
-            inlst.append(cb)
-    outlst = []
-    if cb9.get():
-        outlst.append(cb9.get())
-    ml.inputs = inlst
-    ml.output = outlst
-    if ml.inputs == []:
-        messagebox.showerror('Error','Choose Inputs!')
-        return
-    if ml.output == []:
-        messagebox.showerror('Error','Choose Output!')
-        return
-    xblst = [(var1.get(),'MLR'),(var2.get(),'PLR'),(var3.get(),'SVR'),(var4.get(),'DTR'),(var5.get(),'RFR')]
-    reglst = []
-    for val, txt in xblst:
-        if val == 1:
-            reglst.append(txt)
-    # print(reglst)
-    ml.reglst = reglst
-    if ml.reglst == []:
-        messagebox.showerror('Error','Choose Model!')
-        return
-    try: 
+            messagebox.showerror('Error', 'Training Error!')
+            return
+
+    # predict results based on app inputs and plot data
+    def predict(self):
+        reglst = self.get_ml()
+        self.ml.reglst = reglst
+        if self.cb1to9[2].get() != '':
+            try:
+                if int(self.cb1to9[2].get()) > len(self.ml.y_test):
+                    messagebox.showerror('Error', 'Points must not exceed ' + str(len(self.ml.y_test)) + '!')
+                    return
+                else:
+                    self.ml.numresult = int(self.cb1to9[2].get())
+            except Exception:
+                messagebox.showerror('Error', 'Input Error!')
+                return
+        else:
+            messagebox.showerror('Error', 'Enter Points!')
+            return
+        models = []
+        legendlst = []
+        result = {}
         t1 = time.time()
-        ml.train()
+        result = self.ml.predict()
         t2 = time.time()
-        lb14.set('Status: Trained ~'+str(round((t2-t1)*1e3,1))+'ms')
-    except Exception:
-        messagebox.showerror('Error','Training Error!')
-        return   
+        self.lb7to8[0].set('Status: Predicted ~' + str(round((t2 - t1) * 1e3, 1)) + 'ms')
+        models = [*result]
+        colorlst = {'MLR': 'b', 'PLR': 'g', 'SVR': 'r', 'DTR': 'm', 'RFR': 'y'}
+        markerlst = {'MLR': 'P', 'PLR': 'o', 'SVR': 's', 'DTR': '^', 'RFR': '*'}
+        self.ax.cla()
+        units = {'Dens': 'g/L', 'Visco': 'cSt', 'Temp': "\N{DEGREE SIGN}C"}
+        limits = {'Dens': [750, 950], 'Visco': [0, 1000], 'Temp': [20, 150]}
+        output = self.cb1to9[8].get()
+        linedata = np.arange(limits[output][0], limits[output][1])
+        self.ax.plot(linedata, linedata, 'k--', linewidth=1, label='_nolegend_')
+        self.ax.set_ylim(limits[output])
+        self.ax.set_xlim(limits[output])
+        self.ax.set_xlabel("Real," + units[output])
+        self.ax.set_ylabel("Predicted," + units[output])
+        for model in models:
+            self.ax.scatter(result[model][2][:, 1], result[model][2][:, 0], alpha=0.8, c=colorlst[model],
+                       marker=markerlst[model])
+            legendlst.append(
+                model + ' \u03C3=' + str(round(result[model][0], 2)) + '(' + str(round(result[model][1], 2)) + '%) ~' +
+                result[model][3])
+        self.ax.legend(legendlst)
+        self.toolbar.update()
+        self.fig.tight_layout()
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
 
-# predict results based on app inputs and plot data
-def predict():
-    xblst = [(var1.get(),'MLR'),(var2.get(),'PLR'),(var3.get(),'SVR'),(var4.get(),'DTR'),(var5.get(),'RFR')]
-    reglst = []
-    for val, txt in xblst:
-        if val == 1:
-            reglst.append(txt)
-    # print(reglst)
-    ml.reglst = reglst
-    if cb3.get() != '':
-        try: 
-            if int(cb3.get()) > len(ml.y_test):
-                messagebox.showerror('Error','Points must not exceed '+str(len(ml.y_test))+'!')
-                return
-            else:
-                ml.numresult = int(cb3.get())
-        except Exception:
-            messagebox.showerror('Error','Input Error!')
-            return                
-    else: 
-        messagebox.showerror('Error','Enter Points!')
-        return
-    models = []
-    legendlst = []
-    result = {}
-    t1 = time.time()
-    result = ml.predict()
-    t2 = time.time()
-    lb14.set('Status: Predicted ~'+str(round((t2-t1)*1e3,1))+'ms')
-    models = [*result]
-    colorlst = {'MLR':'b','PLR':'g','SVR':'r','DTR':'m','RFR':'y'}
-    markerlst = {'MLR':'P','PLR':'o','SVR':'s','DTR':'^','RFR':'*'}
-    ax.cla()
-    units = {'Dens':'g/L','Visco':'cSt','Temp':"\N{DEGREE SIGN}C"}
-    limits = {'Dens':[750,950],'Visco':[0,1000],'Temp':[20,150]}
-    output = cb9.get()
-    linedata = np.arange(limits[output][0],limits[output][1])
-    ax.plot(linedata, linedata, 'k--', linewidth=1, label='_nolegend_')
-    ax.set_ylim(limits[output])
-    ax.set_xlim(limits[output])
-    ax.set_xlabel("Real,"+units[output])
-    ax.set_ylabel("Predicted,"+units[output])
-    for model in models:
-        ax.scatter(result[model][2][:,1],result[model][2][:,0],alpha=0.8,c = colorlst[model],marker=markerlst[model])
-        legendlst.append(model+' \u03C3='+str(round(result[model][0],2))+'('+str(round(result[model][1],2))+'%) ~'+result[model][3])
-    ax.legend(legendlst)
-    toolbar.update()
-    fig.tight_layout()
-    fig.canvas.draw()
-    fig.canvas.flush_events()
+    def app_quit(self):
+        response = messagebox.askyesno('Exit', 'Do you want to close app?')
+        if response:
+            self.window.quit()
+            self.window.destroy()
 
-# buttons and main window loop
-bt1 = ttk.Button(lf1,text="Load",command = load, width = w_bt).grid(column = 1,row = 5, padx = n_padx, pady = n_pady, sticky = lb_just)
-bt2 = ttk.Button(lf2,text="Train",command = train, width = w_bt).grid(column = 5,row = 8, padx = n_padx, pady = n_pady, sticky = lb_just)
-bt3 = ttk.Button(lf3,text="Predict",command = predict, width = w_bt).grid(column = 1,row = 8, padx = n_padx, pady = n_pady, sticky = lb_just)
-window.protocol('WM_DELETE_WINDOW', app_quit)
-window.mainloop()
+
+if __name__ == '__main__':
+    gui = GUI()
+    gui.load_gui()
